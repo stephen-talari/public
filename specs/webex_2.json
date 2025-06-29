@@ -1,0 +1,628 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Webex Calling Calls API",
+    "description": "These tests exercise the /telephonycalls Webex Calling API and validate the results.  They are designed to provide developers who are unfamilar with the Calling API with a set of examples to understand the basic concepts of how to use them.\n\n1) Create an outbound (Click to Dial) Call and verify it is gettable and perform a basic Hold and Resume operation on the call.\n2) Answer an inbound call (UserA calls apiUser), intiatate another call from the same user (apiUser calls UserB) and perform a Consult Transfer (i.e. apiUser transfers the call to connect UserA with UserB)\n3) Answer an inbound call (UserA calls apiUser) and blind transfer (Divert) the call to apiUser's voicemail.\n4) Answer an inbound call, park the call on another destination and retrieve the call back to apiUser.\n5) Get Call History (i.e. missed calls, placed calls and received calls).\n6) Voice Messages (execute the voice messages APIs)\n\nBefore running these tests the following environment variables must be set:\n* WEBEX_TOKEN -- an OAuth token for a user configured for calling in the test environment. These tests require a token with all the calling scopes (spark:calls_read and spark:calls_write).  To get started quickly, developers can copy their temporary token from the [Webex For Developers Gettings Started Guide](https://developer.webex.com/docs/api/getting-started#accounts-and-authentication). \n* WEBEX_API_URL -- the URL of the meetings API under test, generally the default value of \"https://webexapis.com/v1/\" does not need to be changed\n* DESTINATION -- The destination to be dialed. Destination can be extensions, PSTN numbers, FAC codes or SIP URI. The destination can be digits or a URI. Some examples for destination include: 1234, 2223334444, +12223334444, *73, tel:+12223334444, user@company.domain, sip:user@company.domain\n* TRANSFER_DESTINATION -- The destination to be dialed. This is used to make a second call from the api user in order to transfer the call.\n* PARK_DESTINATION  -- The destination to park the call.\n* VOICE_MESSAGE_ID - the voice message Id.  Used by the Voice Message APIs that require a message Id to perform the action.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://{{webex_api_url}}telephony"
+    },
+    {
+      "url": "https://postman-echo.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Basic Call With Hold and Resume"
+    },
+    {
+      "name": "Answer Inbound Call and Transfer"
+    },
+    {
+      "name": "Blind Transfer To Voicemail"
+    },
+    {
+      "name": "Park and Retrieve a call"
+    },
+    {
+      "name": "Call History"
+    },
+    {
+      "name": "Voice Messages"
+    }
+  ],
+  "paths": {
+    "/calls/dial": {
+      "post": {
+        "tags": [
+          "Answer Inbound Call and Transfer"
+        ],
+        "summary": "Dial (Click to Call) 2nd Number",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "destination": "{{TRANSFER_DESTINATION}}"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/calls/answer": {
+      "post": {
+        "tags": [
+          "Park and Retrieve a call"
+        ],
+        "summary": "Answer a Call",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "callId": "{{_retrievedCallId}}"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/calls/": {
+      "get": {
+        "tags": [
+          "Park and Retrieve a call"
+        ],
+        "summary": "Get Call Status",
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/calls/hold": {
+      "post": {
+        "tags": [
+          "Basic Call With Hold and Resume"
+        ],
+        "summary": "Hold",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "callId": "{{_callId}}"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/calls/resume": {
+      "post": {
+        "tags": [
+          "Basic Call With Hold and Resume"
+        ],
+        "summary": "Resume",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "callId": "{{_callId}}"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/calls/hangup": {
+      "post": {
+        "tags": [
+          "Basic Call With Hold and Resume"
+        ],
+        "summary": "End a Call",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "callId": "{{_callId}}"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "tags": [
+          "Park and Retrieve a call"
+        ],
+        "summary": "Cleanup",
+        "description": "This request will run a pre-request script that will delete all the temporary environment variables that have been set.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/calls/transfer": {
+      "post": {
+        "tags": [
+          "Answer Inbound Call and Transfer"
+        ],
+        "summary": "Transfer",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": ""
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/calls/divert": {
+      "post": {
+        "tags": [
+          "Blind Transfer To Voicemail"
+        ],
+        "summary": "Divert a Call To Voicemail",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "callId": "{{_callId}}",
+                  "toVoicemail": true
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/calls/park": {
+      "post": {
+        "tags": [
+          "Park and Retrieve a call"
+        ],
+        "summary": "Park the Call",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "callId": "{{_callId}}",
+                  "destination": "{{PARK_DESTINATION}}"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/calls/retrieve": {
+      "post": {
+        "tags": [
+          "Park and Retrieve a call"
+        ],
+        "summary": "Retrieve the Call",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "destination": "{{_parkedAgainst}}"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/calls/history": {
+      "get": {
+        "tags": [
+          "Call History"
+        ],
+        "summary": "Get Call History - Missed Calls",
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "missed"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/voiceMessages/summary": {
+      "get": {
+        "tags": [
+          "Voice Messages"
+        ],
+        "summary": "Get Message Summary",
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/voiceMessages": {
+      "get": {
+        "tags": [
+          "Voice Messages"
+        ],
+        "summary": "Get List of Messages",
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/voiceMessages/markAsRead": {
+      "post": {
+        "tags": [
+          "Voice Messages"
+        ],
+        "summary": "Mark All Messages as Read",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": ""
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/voiceMessages/markAsUnread": {
+      "post": {
+        "tags": [
+          "Voice Messages"
+        ],
+        "summary": "Mark All Messages as Unread",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": ""
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/voiceMessages/{VOICE_MESSAGE_ID}": {
+      "delete": {
+        "tags": [
+          "Voice Messages"
+        ],
+        "summary": "Delete Message",
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/json"
+          },
+          {
+            "name": "VOICE_MESSAGE_ID",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    }
+  }
+}
