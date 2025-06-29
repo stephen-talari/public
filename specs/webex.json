@@ -1,624 +1,801 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "Webex Calling Calls API",
-    "description": "These tests exercise the /telephonycalls Webex Calling API and validate the results.  They are designed to provide developers who are unfamilar with the Calling API with a set of examples to understand the basic concepts of how to use them.\n\n1) Create an outbound (Click to Dial) Call and verify it is gettable and perform a basic Hold and Resume operation on the call.\n2) Answer an inbound call (UserA calls apiUser), intiatate another call from the same user (apiUser calls UserB) and perform a Consult Transfer (i.e. apiUser transfers the call to connect UserA with UserB)\n3) Answer an inbound call (UserA calls apiUser) and blind transfer (Divert) the call to apiUser's voicemail.\n4) Answer an inbound call, park the call on another destination and retrieve the call back to apiUser.\n5) Get Call History (i.e. missed calls, placed calls and received calls).\n6) Voice Messages (execute the voice messages APIs)\n\nBefore running these tests the following environment variables must be set:\n* WEBEX_TOKEN -- an OAuth token for a user configured for calling in the test environment. These tests require a token with all the calling scopes (spark:calls_read and spark:calls_write).  To get started quickly, developers can copy their temporary token from the [Webex For Developers Gettings Started Guide](https://developer.webex.com/docs/api/getting-started#accounts-and-authentication). \n* WEBEX_API_URL -- the URL of the meetings API under test, generally the default value of \"https://webexapis.com/v1/\" does not need to be changed\n* DESTINATION -- The destination to be dialed. Destination can be extensions, PSTN numbers, FAC codes or SIP URI. The destination can be digits or a URI. Some examples for destination include: 1234, 2223334444, +12223334444, *73, tel:+12223334444, user@company.domain, sip:user@company.domain\n* TRANSFER_DESTINATION -- The destination to be dialed. This is used to make a second call from the api user in order to transfer the call.\n* PARK_DESTINATION  -- The destination to park the call.\n* VOICE_MESSAGE_ID - the voice message Id.  Used by the Voice Message APIs that require a message Id to perform the action.",
-    "version": "1.0.0"
+    "title": "Webex Messaging API",
+    "version": "1.0.0",
+    "description": "Hey there! Thanks for checking out Cisco Webex for Developers. If you've used Cisco Webex Meetings or Cisco Webex Teams (formerly Cisco Spark) you know how easy it is to meet and collaborate with your team members and customers.\n\nThe Webex for Developers program opens up the power behind the Webex platform to anyone seeking to extend the Webex experience.\n\nWebex Meetings is a powerful conferencing solution that lets you connect with anyone, anywhere, in real time. By combining video, audio and content sharing, Webex Meetings creates an effective conferencing environment, leading to more productive meetings and increased productivity. Developer information for Webex Meetings will soon be available on this site. In the meantime, to get started with developing for Webex Meetings, please see the Getting Started guides over on Cisco DevNet. Keep reading for information about Webex Teams.\n\nWebex Teams makes staying in sync with your teammates and customers easy.\nConversations in Webex Teams take place in virtual meeting rooms. Some rooms live for a few hours while others become permanent fixtures of your team's workflow with titles like Daily Standup or Build Status. Webex Teams allows conversations to flow seamlessly between messages, video calls, and real-time whiteboarding sessions. No other solution brings together so many facets of collaboration into a single unified platform.\n\nhttps://developer.webex.com/getting-started.html\n"
   },
   "servers": [
     {
-      "url": "http://{{webex_api_url}}telephony"
-    },
-    {
-      "url": "https://postman-echo.com"
+      "url": "https://webexapis.com/v1",
+      "description": "Webex API server"
     }
   ],
-  "components": {
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer"
-      }
-    }
-  },
   "security": [
     {
       "bearerAuth": []
     }
   ],
-  "tags": [
-    {
-      "name": "Basic Call With Hold and Resume"
-    },
-    {
-      "name": "Answer Inbound Call and Transfer"
-    },
-    {
-      "name": "Blind Transfer To Voicemail"
-    },
-    {
-      "name": "Park and Retrieve a call"
-    },
-    {
-      "name": "Call History"
-    },
-    {
-      "name": "Voice Messages"
-    }
-  ],
   "paths": {
-    "/calls/dial": {
-      "post": {
-        "tags": [
-          "Answer Inbound Call and Transfer"
-        ],
-        "summary": "Dial (Click to Call) 2nd Number",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {
-                  "destination": "{{TRANSFER_DESTINATION}}"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "Content-Type",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            },
-            "example": "application/json"
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {}
-            }
-          }
-        }
-      }
-    },
-    "/calls/answer": {
-      "post": {
-        "tags": [
-          "Park and Retrieve a call"
-        ],
-        "summary": "Answer a Call",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {
-                  "callId": "{{_retrievedCallId}}"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "Content-Type",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            },
-            "example": "application/json"
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {}
-            }
-          }
-        }
-      }
-    },
-    "/calls/": {
+    "/rooms": {
       "get": {
-        "tags": [
-          "Park and Retrieve a call"
-        ],
-        "summary": "Get Call Status",
+        "operationId": "listRooms",
+        "summary": "List rooms",
+        "description": "List rooms.\n\nBy default, lists rooms to which the authenticated user belongs.\n\nhttps://developer.webex.com/endpoint-rooms-get.html\n",
         "parameters": [
-          {
-            "name": "Content-Type",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            },
-            "example": "application/json"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {}
-            }
-          }
-        }
-      }
-    },
-    "/calls/hold": {
-      "post": {
-        "tags": [
-          "Basic Call With Hold and Resume"
-        ],
-        "summary": "Hold",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {
-                  "callId": "{{_callId}}"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "Content-Type",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            },
-            "example": "application/json"
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {}
-            }
-          }
-        }
-      }
-    },
-    "/calls/resume": {
-      "post": {
-        "tags": [
-          "Basic Call With Hold and Resume"
-        ],
-        "summary": "Resume",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {
-                  "callId": "{{_callId}}"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "Content-Type",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            },
-            "example": "application/json"
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {}
-            }
-          }
-        }
-      }
-    },
-    "/calls/hangup": {
-      "post": {
-        "tags": [
-          "Basic Call With Hold and Resume"
-        ],
-        "summary": "End a Call",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {
-                  "callId": "{{_callId}}"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "Content-Type",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            },
-            "example": "application/json"
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {}
-            }
-          }
-        }
-      }
-    },
-    "/": {
-      "get": {
-        "tags": [
-          "Park and Retrieve a call"
-        ],
-        "summary": "Cleanup",
-        "description": "This request will run a pre-request script that will delete all the temporary environment variables that have been set.",
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {}
-            }
-          }
-        }
-      }
-    },
-    "/calls/transfer": {
-      "post": {
-        "tags": [
-          "Answer Inbound Call and Transfer"
-        ],
-        "summary": "Transfer",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": ""
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "Content-Type",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            },
-            "example": "application/json"
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {}
-            }
-          }
-        }
-      }
-    },
-    "/calls/divert": {
-      "post": {
-        "tags": [
-          "Blind Transfer To Voicemail"
-        ],
-        "summary": "Divert a Call To Voicemail",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {
-                  "callId": "{{_callId}}",
-                  "toVoicemail": true
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "Content-Type",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            },
-            "example": "application/json"
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {}
-            }
-          }
-        }
-      }
-    },
-    "/calls/park": {
-      "post": {
-        "tags": [
-          "Park and Retrieve a call"
-        ],
-        "summary": "Park the Call",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {
-                  "callId": "{{_callId}}",
-                  "destination": "{{PARK_DESTINATION}}"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "Content-Type",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            },
-            "example": "application/json"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {}
-            }
-          }
-        }
-      }
-    },
-    "/calls/retrieve": {
-      "post": {
-        "tags": [
-          "Park and Retrieve a call"
-        ],
-        "summary": "Retrieve the Call",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {
-                  "destination": "{{_parkedAgainst}}"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "Content-Type",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            },
-            "example": "application/json"
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {}
-            }
-          }
-        }
-      }
-    },
-    "/calls/history": {
-      "get": {
-        "tags": [
-          "Call History"
-        ],
-        "summary": "Get Call History - Missed Calls",
-        "parameters": [
-          {
-            "name": "Content-Type",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            },
-            "example": "application/json"
-          },
           {
             "name": "type",
             "in": "query",
+            "description": "Type of room to filter by",
+            "required": false,
             "schema": {
-              "type": "string"
-            },
-            "example": "missed"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {}
+              "type": "string",
+              "enum": [
+                "direct",
+                "group"
+              ]
             }
-          }
-        }
-      }
-    },
-    "/voiceMessages/summary": {
-      "get": {
-        "tags": [
-          "Voice Messages"
-        ],
-        "summary": "Get Message Summary",
-        "parameters": [
-          {
-            "name": "Content-Type",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            },
-            "example": "application/json"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {}
-            }
-          }
-        }
-      }
-    },
-    "/voiceMessages": {
-      "get": {
-        "tags": [
-          "Voice Messages"
-        ],
-        "summary": "Get List of Messages",
-        "parameters": [
-          {
-            "name": "Content-Type",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            },
-            "example": "application/json"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {}
-            }
-          }
-        }
-      }
-    },
-    "/voiceMessages/markAsRead": {
-      "post": {
-        "tags": [
-          "Voice Messages"
-        ],
-        "summary": "Mark All Messages as Read",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": ""
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "Content-Type",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            },
-            "example": "application/json"
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {}
-            }
-          }
-        }
-      }
-    },
-    "/voiceMessages/markAsUnread": {
-      "post": {
-        "tags": [
-          "Voice Messages"
-        ],
-        "summary": "Mark All Messages as Unread",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": ""
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "Content-Type",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            },
-            "example": "application/json"
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {}
-            }
-          }
-        }
-      }
-    },
-    "/voiceMessages/{VOICE_MESSAGE_ID}": {
-      "delete": {
-        "tags": [
-          "Voice Messages"
-        ],
-        "summary": "Delete Message",
-        "parameters": [
-          {
-            "name": "Content-Type",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            },
-            "example": "application/json"
           },
           {
-            "name": "VOICE_MESSAGE_ID",
-            "in": "path",
+            "name": "sortBy",
+            "in": "query",
+            "description": "Sort the results by this field",
+            "required": false,
             "schema": {
-              "type": "string"
-            },
-            "required": true
+              "type": "string",
+              "enum": [
+                "id",
+                "lastactivity",
+                "created"
+              ]
+            }
+          },
+          {
+            "name": "max",
+            "in": "query",
+            "description": "Maximum number of rooms to return",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
           }
         ],
         "responses": {
-          "204": {
-            "description": "Successful response",
+          "200": {
+            "description": "List of rooms",
             "content": {
-              "application/json": {}
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Room"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createRoom",
+        "summary": "Create a room",
+        "description": "Creates a room. The authenticated user is automatically added as a member of the room. See the Memberships API to learn how to add more people to the room.\n\nhttps://developer.webex.com/endpoint-rooms-post.html\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "title"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "A user-friendly name for the room",
+                    "example": "Testing Cards"
+                  },
+                  "teamId": {
+                    "type": "string",
+                    "description": "The ID for the team with which this room is associated",
+                    "example": "Y2lzY29zcGFyazovL3VzL1RFQU0vMTRlNmEyZTEtZjY2ZC00YjZiLWE1ZWMtZGU4OWZlODNkYWU4"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Room created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Room"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/rooms/{roomId}": {
+      "parameters": [
+        {
+          "name": "roomId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "The unique identifier for the room"
+        }
+      ],
+      "get": {
+        "operationId": "getRoomDetails",
+        "summary": "Get room details",
+        "description": "Shows details for a room, by ID.\n\nSpecify the room ID in the roomId parameter in the URI.\n\nhttps://developer.webex.com/endpoint-rooms-roomId-get.html\n",
+        "responses": {
+          "200": {
+            "description": "Room details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Room"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateRoom",
+        "summary": "Update a room",
+        "description": "Updates details for a room, by ID.\n\nSpecify the room ID in the roomId parameter in the URI.\n\nhttps://developer.webex.com/endpoint-rooms-roomId-put.html\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "A user-friendly name for the room"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Room updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Room"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteRoom",
+        "summary": "Delete a room",
+        "description": "Deletes a room, by ID.\n\nSpecify the room ID in the roomId parameter in the URI.\n\nhttps://developer.webex.com/endpoint-rooms-roomId-delete.html\n",
+        "responses": {
+          "204": {
+            "description": "Room deleted successfully"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/messages": {
+      "get": {
+        "operationId": "listMessages",
+        "summary": "List messages",
+        "description": "Lists all messages in a room. If present, includes the associated media content attachment for each message.\n\nThe list sorts the messages in descending order by creation date.\n\nhttps://developer.webex.com/endpoint-messages-get.html\n",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The room ID for which to list messages"
+          },
+          {
+            "name": "max",
+            "in": "query",
+            "description": "Maximum number of messages to return",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of messages",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Message"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createMessage",
+        "summary": "Create a message",
+        "description": "Posts a plain text or markdown message, and optionally, a media content attachment, to a room.\n\nhttps://developer.webex.com/endpoint-messages-post.html\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "roomId"
+                ],
+                "properties": {
+                  "roomId": {
+                    "type": "string",
+                    "description": "The room ID for the message",
+                    "example": "Y2lzY29zcGFyazovL3VzL1JPT00vYmJjZWIxYWQtNDNmMS0zYjU4LTkxNDctZjE0YmIwYzRkMTU0"
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "The message content in plain text (maximum 7439 characters)",
+                    "maxLength": 7439,
+                    "example": "hi from Postman"
+                  },
+                  "markdown": {
+                    "type": "string",
+                    "description": "The message content in Markdown format (supports mentions like @personEmail:email@domain.com)",
+                    "maxLength": 7439,
+                    "example": "Hi <@personEmail:CiscoDevNet@webex.bot|CiscoDevNet>, your order has been processed."
+                  },
+                  "html": {
+                    "type": "string",
+                    "description": "The message content in HTML format (not officially supported but may work in some cases)",
+                    "maxLength": 7439,
+                    "example": "<strong>Hello World</strong>"
+                  },
+                  "files": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "description": "URLs of files to attach to the message",
+                    "example": [
+                      "https://example.com/file.pdf"
+                    ]
+                  },
+                  "attachments": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Attachment"
+                    },
+                    "description": "Adaptive card attachments",
+                    "example": [
+                      {
+                        "contentType": "application/vnd.microsoft.card.adaptive",
+                        "content": {
+                          "type": "AdaptiveCard",
+                          "version": "1.0",
+                          "body": [
+                            {
+                              "type": "TextBlock",
+                              "text": "Please enter your name:"
+                            },
+                            {
+                              "type": "Input.Text",
+                              "id": "name",
+                              "placeholder": "name"
+                            }
+                          ],
+                          "actions": [
+                            {
+                              "type": "Action.Submit",
+                              "title": "Submit"
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "roomId": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "roomId": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "files": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Message created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/messages/{messageId}": {
+      "parameters": [
+        {
+          "name": "messageId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "The unique identifier for the message"
+        }
+      ],
+      "get": {
+        "operationId": "getMessageDetails",
+        "summary": "Get message details",
+        "description": "Shows details for a message, by message ID.\n\nSpecify the message ID in the messageId parameter in the URI.\n\nhttps://developer.webex.com/endpoint-messages-messageId-get.html\n",
+        "responses": {
+          "200": {
+            "description": "Message details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteMessage",
+        "summary": "Delete a message",
+        "description": "Deletes a message, by message ID.\n\nSpecify the message ID in the messageId parameter in the URI.\n\nhttps://developer.webex.com/endpoint-messages-messageId-delete.html\n",
+        "responses": {
+          "204": {
+            "description": "Message deleted successfully"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/attachment/actions": {
+      "post": {
+        "operationId": "createAttachmentAction",
+        "summary": "Create an attachment action",
+        "description": "Create a new attachment action.\n\nhttps://developer.webex.com/docs/api/v1/attachment-actions/create-an-attachment-action\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "type",
+                  "messageId"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "submit"
+                    ],
+                    "description": "The type of action"
+                  },
+                  "messageId": {
+                    "type": "string",
+                    "description": "The parent message to attach this action to"
+                  },
+                  "inputs": {
+                    "type": "object",
+                    "description": "The inputs collected from the card"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Attachment action created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentAction"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/attachment/actions/{actionId}": {
+      "parameters": [
+        {
+          "name": "actionId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "The unique identifier for the attachment action"
+        }
+      ],
+      "get": {
+        "operationId": "getAttachmentActionDetails",
+        "summary": "Get attachment action details",
+        "description": "Shows details for a attachment action, by ID.\n\nSpecify the attachment action ID in the id URI parameter.\n\nhttps://developer.webex.com/docs/api/v1/attachment-actions/get-attachment-action-details\n",
+        "responses": {
+          "200": {
+            "description": "Attachment action details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentAction"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer token authentication using Webex access token"
+      }
+    },
+    "schemas": {
+      "Room": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for the room"
+          },
+          "title": {
+            "type": "string",
+            "description": "A user-friendly name for the room"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "direct",
+              "group"
+            ],
+            "description": "The type of room"
+          },
+          "isLocked": {
+            "type": "boolean",
+            "description": "Whether the room is locked or not"
+          },
+          "teamId": {
+            "type": "string",
+            "description": "The ID for the team with which this room is associated"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time the room was created"
+          },
+          "lastActivity": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time of the room's last activity"
+          }
+        }
+      },
+      "Message": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for the message"
+          },
+          "roomId": {
+            "type": "string",
+            "description": "The room ID of the message"
+          },
+          "roomType": {
+            "type": "string",
+            "enum": [
+              "direct",
+              "group"
+            ],
+            "description": "The type of room"
+          },
+          "text": {
+            "type": "string",
+            "description": "The message content in plain text (maximum 7439 characters)",
+            "maxLength": 7439
+          },
+          "markdown": {
+            "type": "string",
+            "description": "The message content in Markdown format (supports mentions like @personEmail:email@domain.com)",
+            "maxLength": 7439
+          },
+          "html": {
+            "type": "string",
+            "description": "The message content in HTML format (not officially supported but may work in some cases)",
+            "maxLength": 7439
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "URLs of files attached to the message"
+          },
+          "personId": {
+            "type": "string",
+            "description": "The person ID of the message author"
+          },
+          "personEmail": {
+            "type": "string",
+            "description": "The email address of the message author"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time the message was created"
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Attachment"
+            },
+            "description": "Adaptive card attachments"
+          }
+        }
+      },
+      "Attachment": {
+        "type": "object",
+        "properties": {
+          "contentType": {
+            "type": "string",
+            "description": "The content type of the attachment",
+            "example": "application/vnd.microsoft.card.adaptive"
+          },
+          "content": {
+            "type": "object",
+            "description": "The adaptive card content",
+            "properties": {
+              "type": {
+                "type": "string",
+                "example": "AdaptiveCard"
+              },
+              "version": {
+                "type": "string",
+                "example": "1.0"
+              },
+              "body": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "actions": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "AttachmentAction": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for the attachment action"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "submit"
+            ],
+            "description": "The type of action"
+          },
+          "messageId": {
+            "type": "string",
+            "description": "The parent message ID"
+          },
+          "personId": {
+            "type": "string",
+            "description": "The person ID of the user who performed the action"
+          },
+          "roomId": {
+            "type": "string",
+            "description": "The room ID where the action was performed"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time the action was created"
+          },
+          "inputs": {
+            "type": "object",
+            "description": "The inputs collected from the card"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "A human-readable error message"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "description": {
+                  "type": "string"
+                },
+                "errorCode": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Bad request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
             }
           }
         }
